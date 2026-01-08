@@ -16,6 +16,7 @@ const users_module_1 = require("./users/users.module");
 const books_module_1 = require("./books/books.module");
 const authors_module_1 = require("./authors/authors.module");
 const categories_module_1 = require("./categories/categories.module");
+const borrows_module_1 = require("./borrows/borrows.module");
 const user_entity_1 = require("./entities/user.entity");
 const book_entity_1 = require("./entities/book.entity");
 const author_entity_1 = require("./entities/author.entity");
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             books_module_1.BooksModule,
             authors_module_1.AuthorsModule,
             categories_module_1.CategoriesModule,
+            borrows_module_1.BorrowsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

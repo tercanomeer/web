@@ -29,6 +29,7 @@ export const Layout = ({ children }: LayoutProps) => {
               <Link to="/books">Books</Link>
               <Link to="/authors">Authors</Link>
               <Link to="/categories">Categories</Link>
+              <Link to="/borrows">Borrows</Link>
               {user?.role === UserRoleValues.ADMIN && (
                 <Link to="/users">Users</Link>
               )}

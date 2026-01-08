@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AuthResponse, Book, Author, Category, User, CreateBookDto, CreateAuthorDto, CreateCategoryDto } from '../types';
+import type { AuthResponse, Book, Author, Category, User, CreateBookDto, CreateAuthorDto, CreateCategoryDto, Borrow, CreateBorrowDto } from '../types';
 
 const API_URL = 'http://localhost:3000';
 
@@ -178,3 +178,31 @@ export const usersService = {
   },
 };
 
+export const borrowsService = {
+  async getAll(userId?: number, bookId?: number): Promise<Borrow[]> {
+    const params: any = {};
+    if (userId) params.userId = userId;
+    if (bookId) params.bookId = bookId;
+    const response = await api.get<Borrow[]>('/borrows', { params });
+    return response.data;
+  },
+
+  async getById(id: number): Promise<Borrow> {
+    const response = await api.get<Borrow>(`/borrows/${id}`);
+    return response.data;
+  },
+
+  async create(data: CreateBorrowDto): Promise<Borrow> {
+    const response = await api.post<Borrow>('/borrows', data);
+    return response.data;
+  },
+
+  async returnBook(id: number): Promise<Borrow> {
+    const response = await api.patch<Borrow>(`/borrows/${id}/return`);
+    return response.data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await api.delete(`/borrows/${id}`);
+  },
+};

@@ -62,3 +62,17 @@ export interface CreateCategoryDto {
   description?: string;
 }
 
+export interface Borrow {
+  id: number;
+  userId: number;
+  bookId: number;
+  borrowDate: Date;
+  returnDate: Date | null;
+  user: User;
+  book: Book;
+}
+
+export interface CreateBorrowDto {
+  bookId: number;
+  userId: number;
+}

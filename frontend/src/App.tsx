@@ -9,6 +9,7 @@ import { Books } from './pages/Books';
 import { Authors } from './pages/Authors';
 import { Categories } from './pages/Categories';
 import { Users } from './pages/Users';
+import { Borrows } from './pages/Borrows';
 import { UserRoleValues } from './types';
 import './App.css';
 
@@ -71,6 +72,16 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={[UserRoleValues.ADMIN]}>
             <Layout>
               <Users />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/borrows"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Borrows />
             </Layout>
           </ProtectedRoute>
         }

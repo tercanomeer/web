@@ -9,6 +9,7 @@ import './CRUD.css';
 export const Authors = () => {
   const { user } = useAuth();
   const isGuest = user?.role === UserRoleValues.GUEST;
+  const isAdmin = user?.role === UserRoleValues.ADMIN;
   const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -106,7 +107,7 @@ export const Authors = () => {
       <GuestRestrictionModal isOpen={showGuestModal} onClose={() => setShowGuestModal(false)} />
       <div className="crud-header">
         <h1>Authors Management</h1>
-        {!isGuest && (
+        {isAdmin && (
           <button onClick={handleAddNew} className="btn-primary">
             Add New Author
           </button>
@@ -171,7 +172,7 @@ export const Authors = () => {
                 <td>{author.name}</td>
                 <td>{author.bio || 'N/A'}</td>
                 <td>
-                  {!isGuest && (
+                  {isAdmin && (
                     <>
                       <button onClick={() => handleEdit(author)} className="btn-edit">
                         Edit
@@ -181,7 +182,7 @@ export const Authors = () => {
                       </button>
                     </>
                   )}
-                  {isGuest && <span style={{ color: '#999' }}>Read Only</span>}
+                  {!isAdmin && <span style={{ color: '#999' }}>Read Only</span>}
                 </td>
               </tr>
             ))

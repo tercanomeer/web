@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { BooksModule } from './books/books.module';
 import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './categories/categories.module';
+import { BorrowsModule } from './borrows/borrows.module';
 import { User } from './entities/user.entity';
 import { Book } from './entities/book.entity';
 import { Author } from './entities/author.entity';
@@ -26,6 +27,7 @@ import { Borrow } from './entities/borrow.entity';
     BooksModule,
     AuthorsModule,
     CategoriesModule,
+    BorrowsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { booksService, authorsService, categoriesService } from '../services/api';
-import type { Book, Author, Category, CreateBookDto } from '../types';
+import { booksService, authorsService, categoriesService, borrowsService } from '../services/api';
+import type { Book, Author, Category, CreateBookDto, Borrow } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { UserRoleValues } from '../types';
 import { GuestRestrictionModal } from '../components/GuestRestrictionModal';
@@ -9,6 +9,7 @@ import './CRUD.css';
 export const Books = () => {
   const { user } = useAuth();
   const isGuest = user?.role === UserRoleValues.GUEST;
+  const isAdmin = user?.role === UserRoleValues.ADMIN;
   const [books, setBooks] = useState<Book[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -28,9 +29,12 @@ export const Books = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [borrows, setBorrows] = useState<Borrow[]>([]);
+  const [borrowingBookId, setBorrowingBookId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
+    loadBorrows();
   }, []);
 
   const loadData = async () => {
@@ -47,6 +51,15 @@ export const Books = () => {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBorrows = async () => {
+    try {
+      const data = await borrowsService.getAll();
+      setBorrows(data);
+    } catch (error) {
+      console.error('Error loading borrows:', error);
     }
   };
 
@@ -171,12 +184,55 @@ export const Books = () => {
     setShowForm(true);
   };
 
+  const handleBorrowBook = async (bookId: number) => {
+    if (isGuest) {
+      setShowGuestModal(true);
+      return;
+    }
+    
+    if (!user) {
+      alert('You must be logged in to borrow a book');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to borrow this book?')) return;
+
+    try {
+      setBorrowingBookId(bookId);
+      await borrowsService.create({
+        bookId,
+        userId: user.id,
+      });
+      await loadBorrows();
+      alert('Book borrowed successfully!');
+    } catch (error: any) {
+      console.error('Error borrowing book:', error);
+      alert(error.response?.data?.message || 'Error borrowing book');
+    } finally {
+      setBorrowingBookId(null);
+    }
+  };
+
+  const getAvailableQuantity = (book: Book) => {
+    const activeBorrows = borrows.filter(
+      (borrow) => borrow.bookId === book.id && !borrow.returnDate
+    ).length;
+    return book.quantity - activeBorrows;
+  };
+
+  const isBookBorrowedByUser = (bookId: number) => {
+    if (!user) return false;
+    return borrows.some(
+      (borrow) => borrow.bookId === bookId && borrow.userId === user.id && !borrow.returnDate
+    );
+  };
+
   return (
     <div className="crud-container">
       <GuestRestrictionModal isOpen={showGuestModal} onClose={() => setShowGuestModal(false)} />
       <div className="crud-header">
         <h1>Books Management</h1>
-        {!isGuest && (
+        {isAdmin && (
           <button onClick={handleAddNew} className="btn-primary">
             Add New Book
           </button>
@@ -324,9 +380,11 @@ export const Books = () => {
                 <td>{book.isbn}</td>
                 <td>{book.author?.name || 'N/A'}</td>
                 <td>{book.categories?.map((c) => c.name).join(', ') || 'None'}</td>
-                <td>{book.quantity}</td>
                 <td>
-                  {!isGuest && (
+                  {book.quantity} (Available: {getAvailableQuantity(book)})
+                </td>
+                <td>
+                  {isAdmin && (
                     <>
                       <button onClick={() => handleEdit(book)} className="btn-edit">
                         Edit
@@ -336,7 +394,31 @@ export const Books = () => {
                       </button>
                     </>
                   )}
-                  {isGuest && <span style={{ color: '#999' }}>Read Only</span>}
+                  {!isGuest && getAvailableQuantity(book) > 0 && !isBookBorrowedByUser(book.id) && (
+                    <button
+                      onClick={() => handleBorrowBook(book.id)}
+                      className="btn-primary"
+                      style={{ marginLeft: isAdmin ? '5px' : '0', padding: '6px 12px', fontSize: '14px' }}
+                      disabled={borrowingBookId === book.id}
+                    >
+                      {borrowingBookId === book.id ? 'Borrowing...' : 'Borrow'}
+                    </button>
+                  )}
+                  {!isGuest && isBookBorrowedByUser(book.id) && (
+                    <span style={{ marginLeft: isAdmin ? '5px' : '0', color: '#4CAF50', fontWeight: 'bold' }}>
+                      Borrowed by you
+                    </span>
+                  )}
+                  {isGuest && (
+                    <>
+                      <span style={{ color: '#999' }}>Read Only</span>
+                      {getAvailableQuantity(book) > 0 && (
+                        <span style={{ marginLeft: '10px', color: '#4CAF50' }}>
+                          Available: {getAvailableQuantity(book)}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </td>
               </tr>
             ))

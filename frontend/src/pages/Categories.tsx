@@ -9,6 +9,7 @@ import './CRUD.css';
 export const Categories = () => {
   const { user } = useAuth();
   const isGuest = user?.role === UserRoleValues.GUEST;
+  const isAdmin = user?.role === UserRoleValues.ADMIN;
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -106,7 +107,7 @@ export const Categories = () => {
       <GuestRestrictionModal isOpen={showGuestModal} onClose={() => setShowGuestModal(false)} />
       <div className="crud-header">
         <h1>Categories Management</h1>
-        {!isGuest && (
+        {isAdmin && (
           <button onClick={handleAddNew} className="btn-primary">
             Add New Category
           </button>
@@ -171,7 +172,7 @@ export const Categories = () => {
                 <td>{category.name}</td>
                 <td>{category.description || 'N/A'}</td>
                 <td>
-                  {!isGuest && (
+                  {isAdmin && (
                     <>
                       <button onClick={() => handleEdit(category)} className="btn-edit">
                         Edit
@@ -181,7 +182,7 @@ export const Categories = () => {
                       </button>
                     </>
                   )}
-                  {isGuest && <span style={{ color: '#999' }}>Read Only</span>}
+                  {!isAdmin && <span style={{ color: '#999' }}>Read Only</span>}
                 </td>
               </tr>
             ))
